@@ -4,7 +4,7 @@ let currentLevel = 0;
 let grid = []; 
 let playerPosition = { x: 0, y: 0 };  
 
-function createGrid(level) {
+function Grid(level) {
     const gridContainer = document.getElementById('grid-container');
     gridContainer.innerHTML = '';  
 
@@ -53,16 +53,16 @@ function movePlayer(dx, dy) {
     const newX = playerPosition.x + dx;
     const newY = playerPosition.y + dy;
 
-    if (isValidMove(newX, newY)) {
+    if (ValidMove(newX, newY)) {
         grid[playerPosition.y][playerPosition.x].classList.remove('player');
         playerPosition = { x: newX, y: newY };
         grid[playerPosition.y][playerPosition.x].classList.add('player');
     }
 
-    updateTargetColors();
+    updateColors();
 }
 
-function isValidMove(x, y) {
+function ValidMove(x, y) {
     if (x < 0 || x >= grid[0].length || y < 0 || y >= grid.length) {
         return false; 
     }
@@ -72,7 +72,7 @@ function isValidMove(x, y) {
     if (grid[y][x].classList.contains('box')) {
         const nextX = x + (x - playerPosition.x); 
         const nextY = y + (y - playerPosition.y); 
-        if (isValidBoxMove(nextX, nextY)) {
+        if (ValidBoxMove(nextX, nextY)) {
            
             grid[nextY][nextX].classList.add('box');
             grid[nextY][nextX].style.backgroundColor = 'brown';
@@ -87,7 +87,7 @@ function isValidMove(x, y) {
     return true; 
 }
 
-function isValidBoxMove(x, y) {
+function ValidBoxMove(x, y) {
     if (x < 0 || x >= grid[0].length || y < 0 || y >= grid.length) {
         return false; 
     }
@@ -100,12 +100,12 @@ function isValidBoxMove(x, y) {
     return true;
 }
 
-function updateTargetColors() {
+function updateColors() {
     for (let row = 0; row < grid.length; row++) {
         for (let col = 0; col < grid[row].length; col++) {
             const cell = grid[row][col];
             if (cell.classList.contains('target')) {
-                const box = findBoxAtPosition(col, row);
+                const box = BoxPosition(col, row);
                 if (box) {
                     cell.style.backgroundColor = 'green';
                 } else {
@@ -116,7 +116,7 @@ function updateTargetColors() {
     }
 }
 
-function findBoxAtPosition(x, y) {
+function BoxPosition(x, y) {
     const cell = grid[y][x];
     return cell.classList.contains('box') ? cell : null;
 }
@@ -149,10 +149,10 @@ function nextLevel() {
 }
 
 function resetLevel() {
-    createGrid(Levels[currentLevel]); 
+    Grid(Levels[currentLevel]); 
 }
 
-function handleKeyPress(event) {
+function KeyPress(event) {
     switch (event.key) {
         case 'ArrowUp':
             movePlayer(0, -1); 
@@ -171,9 +171,9 @@ function handleKeyPress(event) {
 }
 
 function init() {
-    createGrid(Levels[currentLevel]);
+    Grid(Levels[currentLevel]);
 
-    window.addEventListener('keydown', handleKeyPress);
+    window.addEventListener('keydown', KeyPress);
 
     const resetButton = document.getElementById('reset-button');
     resetButton.addEventListener('click', resetLevel);
