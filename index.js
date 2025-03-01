@@ -59,7 +59,7 @@ function movePlayer(dx, dy) {
         grid[playerPosition.y][playerPosition.x].classList.add('player');
     }
 
-    updateTargetColors();
+    updateColors();
 }
 
 function isValidMove(x, y) {
@@ -100,7 +100,7 @@ function isValidBoxMove(x, y) {
     return true;
 }
 
-function updateTargetColors() {
+function updateColors() {
     for (let row = 0; row < grid.length; row++) {
         for (let col = 0; col < grid[row].length; col++) {
             const cell = grid[row][col];
