@@ -2,9 +2,10 @@ import { Levels } from './level.js';
 
 let currentLevel = 0;  
 let grid = []; 
-let playerPosition = { x: 0, y: 0 };  
+let playerPosition = { x: 0, y: 0 };
+let stepCount = 0;  
 
-function Grid(level) {
+function createGrid(level) {
     const gridContainer = document.getElementById('grid-container');
     gridContainer.innerHTML = '';  
 
@@ -57,10 +58,18 @@ function movePlayer(dx, dy) {
         grid[playerPosition.y][playerPosition.x].classList.remove('player');
         playerPosition = { x: newX, y: newY };
         grid[playerPosition.y][playerPosition.x].classList.add('player');
+
+        if (grid[playerPosition.y][playerPosition.x].classList.contains('target')) {
+            grid[playerPosition.y][playerPosition.x].style.backgroundColor = ''; 
+        }
+
+        stepCount++;  
+        Counter();  
     }
 
     updateColors();
 }
+
 
 function ValidMove(x, y) {
     if (x < 0 || x >= grid[0].length || y < 0 || y >= grid.length) {
@@ -111,6 +120,11 @@ function updateColors() {
                 } else {
                     cell.style.backgroundColor = 'red';
                 }
+
+                if (cell.classList.contains('player')) {
+                    cell.style.backgroundColor = 'blue';
+                }
+
             }
         }
     }
@@ -149,10 +163,17 @@ function nextLevel() {
 }
 
 function resetLevel() {
-    Grid(Levels[currentLevel]); 
+    stepCount = 0;  
+    Counter();
+    createGrid(Levels[currentLevel]); 
 }
 
-function KeyPress(event) {
+function Counter() {
+    const stepCounterElement = document.getElementById('counter');
+    stepCounterElement.textContent = `Pas : ${stepCount}`;  
+}
+
+function handleKeyPress(event) {
     switch (event.key) {
         case 'ArrowUp':
             movePlayer(0, -1); 
@@ -171,9 +192,9 @@ function KeyPress(event) {
 }
 
 function init() {
-    Grid(Levels[currentLevel]);
+    createGrid(Levels[currentLevel]);
 
-    window.addEventListener('keydown', KeyPress);
+    window.addEventListener('keydown', handleKeyPress);
 
     const resetButton = document.getElementById('reset-button');
     resetButton.addEventListener('click', resetLevel);
