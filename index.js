@@ -11,6 +11,8 @@ function createGrid(level) {
 
     grid = [];  
 
+    let playerFound = false; 
+
     for (let row = 0; row < level.length; row++) {
         const gridRow = [];
         for (let col = 0; col < level[row].length; col++) {
@@ -31,6 +33,7 @@ function createGrid(level) {
                 case 3:
                     cell.classList.add('player');
                     playerPosition = { x: col, y: row };
+                    playerFound = true; 
                     break;
                 case 4:
                     cell.classList.add('target');
@@ -44,11 +47,17 @@ function createGrid(level) {
         grid.push(gridRow);
     }
 
+    if (!playerFound) {
+        alert('Erreur : Il n\'y a pas de joueur dans ce niveau !');
+        return;  
+    }
+
     const gridWidth = level[0].length;
     const gridHeight = level.length;
     gridContainer.style.gridTemplateColumns = `repeat(${gridWidth}, 40px)`;
     gridContainer.style.gridTemplateRows = `repeat(${gridHeight}, 40px)`;
 }
+
 
 function movePlayer(dx, dy) {
     const newX = playerPosition.x + dx;
@@ -191,6 +200,11 @@ function handleKeyPress(event) {
     checkWin(); 
 }
 
+ function gameLoop(){
+    updateColors();
+    requestAnimationFrame(gameLoop);
+ }
+
 function init() {
     createGrid(Levels[currentLevel]);
 
@@ -198,6 +212,7 @@ function init() {
 
     const resetButton = document.getElementById('reset-button');
     resetButton.addEventListener('click', resetLevel);
+    requestAnimationFrame(gameLoop);
 }
 
 document.addEventListener('DOMContentLoaded', init);
