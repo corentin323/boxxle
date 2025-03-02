@@ -2,13 +2,16 @@ import { Levels } from './level.js';
 
 let currentLevel = 0;  
 let grid = []; 
-let playerPosition = { x: 0, y: 0 };  
+let playerPosition = { x: 0, y: 0 };
+let stepCount = 0;  
 
 function createGrid(level) {
     const gridContainer = document.getElementById('grid-container');
     gridContainer.innerHTML = '';  
 
     grid = [];  
+
+    let playerFound = false; 
 
     for (let row = 0; row < level.length; row++) {
         const gridRow = [];
@@ -30,6 +33,7 @@ function createGrid(level) {
                 case 3:
                     cell.classList.add('player');
                     playerPosition = { x: col, y: row };
+                    playerFound = true; 
                     break;
                 case 4:
                     cell.classList.add('target');
@@ -43,26 +47,40 @@ function createGrid(level) {
         grid.push(gridRow);
     }
 
+    if (!playerFound) {
+        alert('Erreur : Il n\'y a pas de joueur dans ce niveau !');
+        return;  
+    }
+
     const gridWidth = level[0].length;
     const gridHeight = level.length;
     gridContainer.style.gridTemplateColumns = `repeat(${gridWidth}, 40px)`;
     gridContainer.style.gridTemplateRows = `repeat(${gridHeight}, 40px)`;
 }
 
+
 function movePlayer(dx, dy) {
     const newX = playerPosition.x + dx;
     const newY = playerPosition.y + dy;
 
-    if (isValidMove(newX, newY)) {
+    if (ValidMove(newX, newY)) {
         grid[playerPosition.y][playerPosition.x].classList.remove('player');
         playerPosition = { x: newX, y: newY };
         grid[playerPosition.y][playerPosition.x].classList.add('player');
+
+        if (grid[playerPosition.y][playerPosition.x].classList.contains('target')) {
+            grid[playerPosition.y][playerPosition.x].style.backgroundColor = ''; 
+        }
+
+        stepCount++;  
+        Counter();  
     }
 
     updateColors();
 }
 
-function isValidMove(x, y) {
+
+function ValidMove(x, y) {
     if (x < 0 || x >= grid[0].length || y < 0 || y >= grid.length) {
         return false; 
     }
@@ -72,7 +90,7 @@ function isValidMove(x, y) {
     if (grid[y][x].classList.contains('box')) {
         const nextX = x + (x - playerPosition.x); 
         const nextY = y + (y - playerPosition.y); 
-        if (isValidBoxMove(nextX, nextY)) {
+        if (ValidBoxMove(nextX, nextY)) {
            
             grid[nextY][nextX].classList.add('box');
             grid[nextY][nextX].style.backgroundColor = 'brown';
@@ -87,7 +105,7 @@ function isValidMove(x, y) {
     return true; 
 }
 
-function isValidBoxMove(x, y) {
+function ValidBoxMove(x, y) {
     if (x < 0 || x >= grid[0].length || y < 0 || y >= grid.length) {
         return false; 
     }
@@ -105,18 +123,23 @@ function updateColors() {
         for (let col = 0; col < grid[row].length; col++) {
             const cell = grid[row][col];
             if (cell.classList.contains('target')) {
-                const box = findBoxAtPosition(col, row);
+                const box = BoxPosition(col, row);
                 if (box) {
                     cell.style.backgroundColor = 'green';
                 } else {
                     cell.style.backgroundColor = 'red';
                 }
+
+                if (cell.classList.contains('player')) {
+                    cell.style.backgroundColor = 'blue';
+                }
+
             }
         }
     }
 }
 
-function findBoxAtPosition(x, y) {
+function BoxPosition(x, y) {
     const cell = grid[y][x];
     return cell.classList.contains('box') ? cell : null;
 }
@@ -149,7 +172,14 @@ function nextLevel() {
 }
 
 function resetLevel() {
+    stepCount = 0;  
+    Counter();
     createGrid(Levels[currentLevel]); 
+}
+
+function Counter() {
+    const stepCounterElement = document.getElementById('counter');
+    stepCounterElement.textContent = `Pas : ${stepCount}`;  
 }
 
 function handleKeyPress(event) {
@@ -170,6 +200,11 @@ function handleKeyPress(event) {
     checkWin(); 
 }
 
+ function gameLoop(){
+    updateColors();
+    requestAnimationFrame(gameLoop);
+ }
+
 function init() {
     createGrid(Levels[currentLevel]);
 
@@ -177,6 +212,7 @@ function init() {
 
     const resetButton = document.getElementById('reset-button');
     resetButton.addEventListener('click', resetLevel);
+    requestAnimationFrame(gameLoop);
 }
 
 document.addEventListener('DOMContentLoaded', init);
